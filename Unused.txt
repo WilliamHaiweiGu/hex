@@ -1,0 +1,72 @@
+
+ostream &operator<<(ostream &os, const vector<unsigned int> &a)
+{
+    os << '[';
+    bool start = true;
+    for (unsigned int n : a)
+    {
+        if (start)
+            start = false;
+        else
+            os << ' ';
+        os << n;
+    }
+    os << ']';
+    return os;
+}
+
+/**
+ * A set that only contains numbers in range[0, n). Start with full indeces. Support O(1) elemtent listing, lookup,
+ * and removal. Does not support deletion.
+ */
+class idx_set
+{
+public:
+    idx_set(unsigned int n)
+    {
+        set.reserve(n);
+        for (unsigned int i = 0; i < n; i++)
+            set.push_back(i);
+        pos_of = new unsigned int[n];
+        for (unsigned int i = 0; i < n; i++)
+            pos_of[i] = i;
+    }
+    ~idx_set()
+    {
+        delete[] pos_of;
+    }
+    inline const vector<unsigned int> get_elems() const
+    {
+        return set;
+    }
+    /**
+     * Test if set contains index. No bounds checks.
+     * @param i Index to test. Must be in range [0,n).
+     * @return whether set contains index
+     */
+    inline bool contains(unsigned int i) const
+    {
+        return pos_of[i] < set.size();
+    }
+    /**
+     * Remove index from set. No bounds checks.
+     * @param i Index to remove. Must be in range [0,n) and already in set.
+     */
+    inline void rem(unsigned int i)
+    {
+        // copy tail element into i's position
+        const unsigned int tail_elem_new_pos = pos_of[i];
+        const unsigned int tail_elem = set.back();
+        set[tail_elem_new_pos] = tail_elem;
+        pos_of[tail_elem] = tail_elem_new_pos;
+        // remove redundants
+        pos_of[i] = UINT32_MAX;
+        set.pop_back();
+    }
+
+private:
+    /** Only elems in set[0:size) are considered in the set.*/
+    vector<unsigned int> set;
+    /** pos_of[x]=i ==> i=UINT32_MAX or set[i]=x*/
+    unsigned int *pos_of;
+};
